@@ -8,7 +8,7 @@ from flask_swagger import swagger
 from flask_cors import CORS
 from utils import APIException, generate_sitemap
 from models import db
-#from models import Person
+from models import Person
 
 app = Flask(__name__)
 app.url_map.strict_slashes = False
@@ -36,6 +36,23 @@ def handle_hello():
     }
 
     return jsonify(response_body), 200
+
+@app.route('/person', methods=['POST'])
+def handle_person():
+# First we get the payload json
+    body = request.get_json()
+    if body is None:
+        raise APIException("You need to specify the request body as a json object", status_code=400)
+    if 'username' not in body:
+        raise APIException('You need to specify the username', status_code=400)
+    if 'email' not in body:
+        raise APIException('You need to specify the email', status_code=400)
+# at this point, all data has been validated, we can proceed to insert into the body
+    user1 = Person(username=body['username'], email=body['email'])
+    db.session.add(user1)
+    db.session.commit()
+    return "ok", 200
+
 
 # this only runs if `$ python src/main.py` is executed
 if __name__ == '__main__':
